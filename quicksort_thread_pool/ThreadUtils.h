@@ -6,57 +6,57 @@
 #include <vector> 
 
 class ThreadPool;
-// тип указатель на функцию, которая является эталоном для функций задач
+// С‚РёРї СѓРєР°Р·Р°С‚РµР»СЊ РЅР° С„СѓРЅРєС†РёСЋ, РєРѕС‚РѕСЂР°СЏ СЏРІР»СЏРµС‚СЃСЏ СЌС‚Р°Р»РѕРЅРѕРј РґР»СЏ С„СѓРЅРєС†РёР№ Р·Р°РґР°С‡
 typedef void (*FuncType) (std::vector<int>&, int, int, bool, ThreadPool&, int);     
 typedef std::packaged_task<void()> task_type;
 typedef std::future<void> res_type;
 
 template<class T> class BlockedQueue {
     std::mutex m_locker;
-    // очередь задач
+    // РѕС‡РµСЂРµРґСЊ Р·Р°РґР°С‡
     std::queue<T> m_task_queue;
-    // уведомитель
+    // СѓРІРµРґРѕРјРёС‚РµР»СЊ
     std::condition_variable m_notifier;
 public:
     void push(T& item);    
-    void pop(T& item);          // блокирующий метод получения элемента из очереди 
-    bool fast_pop(T& item);     // неблокирующий метод получения элемента из очереди возвращает false, если очередь пуста
+    void pop(T& item);          // Р±Р»РѕРєРёСЂСѓСЋС‰РёР№ РјРµС‚РѕРґ РїРѕР»СѓС‡РµРЅРёСЏ СЌР»РµРјРµРЅС‚Р° РёР· РѕС‡РµСЂРµРґРё 
+    bool fast_pop(T& item);     // РЅРµР±Р»РѕРєРёСЂСѓСЋС‰РёР№ РјРµС‚РѕРґ РїРѕР»СѓС‡РµРЅРёСЏ СЌР»РµРјРµРЅС‚Р° РёР· РѕС‡РµСЂРµРґРё РІРѕР·РІСЂР°С‰Р°РµС‚ false, РµСЃР»Рё РѕС‡РµСЂРµРґСЊ РїСѓСЃС‚Р°
 };
 
-// пул потоков
+// РїСѓР» РїРѕС‚РѕРєРѕРІ
 class ThreadPool {
-    // количество потоков
+    // РєРѕР»РёС‡РµСЃС‚РІРѕ РїРѕС‚РѕРєРѕРІ
     int m_thread_count;
-    // потоки
+    // РїРѕС‚РѕРєРё
         std::vector<std::thread> m_threads;
-    // очереди задач для потоков
+    // РѕС‡РµСЂРµРґРё Р·Р°РґР°С‡ РґР»СЏ РїРѕС‚РѕРєРѕРІ
     std::vector<BlockedQueue<task_type>> m_thread_queues;
-    // для равномерного распределения задач
+    // РґР»СЏ СЂР°РІРЅРѕРјРµСЂРЅРѕРіРѕ СЂР°СЃРїСЂРµРґРµР»РµРЅРёСЏ Р·Р°РґР°С‡
     int m_index;
 public:
     ThreadPool();
     ~ThreadPool();
-    // запуск:
+    // Р·Р°РїСѓСЃРє:
     void start();
-    // остановка:
+    // РѕСЃС‚Р°РЅРѕРІРєР°:
     void stop();
 
-    //Метод проброса задачи
+    //РњРµС‚РѕРґ РїСЂРѕР±СЂРѕСЃР° Р·Р°РґР°С‡Рё
     res_type push_task(FuncType f, std::vector<int>& arr, int l, int r, bool enable, ThreadPool& tp, int multi_size);
 
-    // функция входа для потока
+    // С„СѓРЅРєС†РёСЏ РІС…РѕРґР° РґР»СЏ РїРѕС‚РѕРєР°
     void threadFunc(int qindex);
     void run_pending_task();
 };
 
 class RequestHandler {
-    // пул потоков
+    // РїСѓР» РїРѕС‚РѕРєРѕРІ
     ThreadPool m_tpool;
 public:
     RequestHandler();
     ~RequestHandler();
 
-    // отправка запроса на выполнение  
+    // РѕС‚РїСЂР°РІРєР° Р·Р°РїСЂРѕСЃР° РЅР° РІС‹РїРѕР»РЅРµРЅРёРµ  
     res_type pushRequest(FuncType f, std::vector<int>& arr, int l, int r, bool enable, ThreadPool& tp, int multi_size);
 };
 
