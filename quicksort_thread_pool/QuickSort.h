@@ -31,11 +31,6 @@ int partition(std::vector<int>& array, int left, int right) {
 	int j = right - 1;
 	int p = right;
 	while ((i < right - 1) && (j > left)) {
-		
-		/*std::cout << "\n\n";
-		std::cout << "i: " << i << "   j: " << j << "   p: " << p << "  arr[p]: " << array[p] << "\n";
-		print_v(array,left,right);
-		std::cout << "\n\n";*/	
 		while (array[i] <= array[p]) {
 			++i;
 			if (i >= j) break;
@@ -46,33 +41,17 @@ int partition(std::vector<int>& array, int left, int right) {
 			--j;
 			if (i >= j) break;
 		}
-		//std::cout << j << " ";
-		//std::cout << "\n";
 		if (i >= j) break;
 		std::swap(array[i], array[j]);
 		++i;
 		--j;
 	}
-	/*std::cout << "\n\n";
-	std::cout << "LAST:\n";
-	std::cout << "i: " << i << "   j: " << j << "   p: " << p << "  arr[p]: " << arr[p] << "\n";
-	print_v(arr);
-	std::cout << "\n\n";	//*/
 	if (array[i] > array[p]) std::swap(array[i], array[p]);
 	return i;
 }
 void quicksort_single(std::vector<int>& array, int left, int right) {
 	if (left >= right) return;
-	/*std::cout << "\nbefore\n";
-	print_v(array, left, right);
-	std::cout << "\n\n";*/	
-
 	int m = partition(array, left, right);
-	/*std::cout << "m: " << m << "\n";
-	std::cout << "\nafter\n";
-	print_v(array, left, right);
-	std::cout << "\n\n";*/	
-
 	quicksort_single(array, left, m);
 	quicksort_single(array, m + 1, right);
 }
@@ -81,9 +60,7 @@ void quicksort_multithread_nopool(std::vector<int>& array, int left, int right, 
 	int size = right - left;
 	int m = partition(array, left, right);
 	if ((size >= 1000) && enable) {
-		auto f = std::async(std::launch::async, [&]() {
-			quicksort_multithread_nopool(array, left, m, true);
-			});
+		auto f = std::async(std::launch::async, [&]() {quicksort_multithread_nopool(array, left, m, true); });
 		quicksort_multithread_nopool(array, m + 1, right, true);
 	}
 	else {
@@ -98,7 +75,7 @@ void quicksort_threadpool(std::vector<int>& array, int left, int right, bool ena
 	int left_bound = left;
 	int right_bound = right;
 	int middle = array[(left_bound + right_bound) / 2];
-	//Меняем элементы местами
+	//РњРµРЅСЏРµРј СЌР»РµРјРµРЅС‚С‹ РјРµСЃС‚Р°РјРё
 	while (left_bound <= right_bound) {
 		while (array[left_bound] < middle) {
 			left_bound++;
@@ -115,8 +92,8 @@ void quicksort_threadpool(std::vector<int>& array, int left, int right, bool ena
 	if (make_thread && (right_bound - left > 10000)) {
 		std::promise<void> promise;
 		std::future<void> future = promise.get_future();
-		// если элементов в левой части больше чем 10000
-		// вызываем асинхронно рекурсию для правой части
+		// РµСЃР»Рё СЌР»РµРјРµРЅС‚РѕРІ РІ Р»РµРІРѕР№ С‡Р°СЃС‚Рё Р±РѕР»СЊС€Рµ С‡РµРј 10000
+		// РІС‹Р·С‹РІР°РµРј Р°СЃРёРЅС…СЂРѕРЅРЅРѕ СЂРµРєСѓСЂСЃРёСЋ РґР»СЏ РїСЂР°РІРѕР№ С‡Р°СЃС‚Рё
 		auto f = std::async(std::launch::async, [&](std::shared_ptr<std::vector<int>> arr_ptr) {
 			quicksort_threadpool(*arr_ptr, left, right_bound, false, tp, multi_size);
 			promise.set_value();
